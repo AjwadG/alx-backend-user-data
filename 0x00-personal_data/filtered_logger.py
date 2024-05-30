@@ -5,6 +5,9 @@ Filtered Logger
 import re
 from typing import List
 import logging
+import mysql.connector
+import os
+
 
 PII_FIELDS = ("name", "email", "phone", "ssn", "password")
 
@@ -72,3 +75,27 @@ def get_logger() -> logging.Logger:
     handler.setFormatter(RedactingFormatter(PII_FIELDS))
     logger.addHandler(handler)
     return logger
+
+
+def get_db() -> mysql.connector.connection.MySQLConnection:
+    """
+    Returns a MySQL connection object.
+
+    This function reads the database credentials from the environment variables
+    and creates a MySQL connection object. If the environment variables are not
+    set, it uses default values.
+
+    Returns:
+        mysql.connector.connection.MySQLConnection: A MySQL connection object.
+    """
+    user = os.getenv('PERSONAL_DATA_DB_USERNAME', 'root')
+    password = os.getenv('PERSONAL_DATA_DB_PASSWORD', '')
+    host = os.getenv('PERSONAL_DATA_DB_HOST', 'localhost')
+    database = os.getenv('PERSONAL_DATA_DB_NAME')
+
+    return mysql.connector.connect.MySQLConnection(
+        user=user,
+        password=password,
+        host=host,
+        database=database
+    )
