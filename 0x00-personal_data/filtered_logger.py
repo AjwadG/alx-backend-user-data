@@ -7,6 +7,7 @@ from typing import List
 import logging
 import mysql.connector
 import os
+from datetime import datetime
 
 
 PII_FIELDS = ("name", "email", "phone", "ssn", "password")
@@ -85,17 +86,41 @@ def get_db() -> mysql.connector.connection.MySQLConnection:
     and creates a MySQL connection object. If the environment variables are not
     set, it uses default values.
 
+    Args:
+        None
+
     Returns:
         mysql.connector.connection.MySQLConnection: A MySQL connection object.
     """
-    user = os.getenv('PERSONAL_DATA_DB_USERNAME', 'root')
-    password = os.getenv('PERSONAL_DATA_DB_PASSWORD', '')
-    host = os.getenv('PERSONAL_DATA_DB_HOST', 'localhost')
-    database = os.getenv('PERSONAL_DATA_DB_NAME')
+    user: str = os.getenv('PERSONAL_DATA_DB_USERNAME', 'root')
+    password: str = os.getenv('PERSONAL_DATA_DB_PASSWORD', '')
+    host: str = os.getenv('PERSONAL_DATA_DB_HOST', 'localhost')
+    database: str = os.getenv('PERSONAL_DATA_DB_NAME')
 
-    return mysql.connector.connect.MySQLConnection(
+    return mysql.connector.connect(
         user=user,
         password=password,
         host=host,
         database=database
     )
+
+
+def main():
+    '''
+    Main function
+    '''
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM users;")
+
+    for row in cursor:
+        message = "name={}; email={}; phone={}; ssn={}; password={};\
+ip={}; last_login={}; user_agent={};".format(*tuple(row))
+        get_logger().info(message)
+
+    cursor.close()
+    db.close()
+
+
+if __name__ == "__main__":
+    main()
