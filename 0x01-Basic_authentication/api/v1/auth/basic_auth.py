@@ -33,7 +33,7 @@ class BasicAuth(Auth):
             base64_bytes = base64_authorization_header.encode('utf-8')
             message_bytes = base64.b64decode(base64_bytes)
             return message_bytes.decode('utf-8')
-        except base64.binascii.Error:
+        except Exception:
             return None
 
     def extract_user_credentials(self, decoded_base64_authorization_header: str
@@ -65,3 +65,13 @@ class BasicAuth(Auth):
             return None
         except Exception:
             return None
+
+    def current_user(self, request=None) -> TypeVar('User'):
+        """ Current user """
+        auth = self.authorization_header(request)
+        base64_auth = self.extract_base64_authorization_header(auth)
+        decoded_base64_auth = self.decode_base64_authorization_header(
+            base64_auth)
+        user_email, user_pwd = self.extract_user_credentials(
+            decoded_base64_auth)
+        return self.user_object_from_credentials(user_email, user_pwd)
