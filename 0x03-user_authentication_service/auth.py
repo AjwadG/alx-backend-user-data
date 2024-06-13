@@ -49,9 +49,9 @@ class Auth:
             user = self._db.find_user_by(email=email)
         except NoResultFound:
             return None
-        user.session_id = _generate_uuid()
-        self._db._session.commit()
-        return user.session_id
+        session_id = _generate_uuid()
+        self._db.update_user(user.id, session_id=session_id)
+        return session_id
 
     def get_user_from_session_id(self, session_id: str) -> Union[User, None]:
         """Get a user from a session id
